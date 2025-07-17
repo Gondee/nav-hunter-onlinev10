@@ -1,0 +1,17 @@
+
+> nav-hunter@0.1.0 dev
+> next dev --turbopack
+
+ ⚠ Port 3000 is in use by process 1339
+25792, using available port 3001 instead.
+   ▲ Next.js 15.4.1 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.1.18:3001
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Compiled middleware in 74ms
+ ✓ Ready in 820ms
+ ✓ Compiled middleware in 0ms
+ ✓ Compiled middleware in 0ms
+[?25h

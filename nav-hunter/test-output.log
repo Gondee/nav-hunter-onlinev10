@@ -1,0 +1,15 @@
+Testing filing processing directly...
+
+1. Logging in...
+Logged in successfully
+
+2. Processing mock MSTR filing...
+Process response status: 200
+Process result: { success: true }
+
+Waiting 10 seconds for processing to complete...
+
+Test complete. Check the UI for:
+- Filing fetch logs in left terminal
+- AI analysis logs in right terminal
+- Alert generation
