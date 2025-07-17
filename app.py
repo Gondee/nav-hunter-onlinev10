@@ -8,6 +8,7 @@ import urllib.parse
 import base64
 import webbrowser
 import threading
+import os
 
 from gevent import monkey
 
@@ -25,9 +26,14 @@ logging.getLogger("engineio").setLevel(logging.ERROR)
 logging.getLogger("socketio").setLevel(logging.ERROR)
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] %(message)s')
 
-# --- Default API Keys and Constants ---
-DEFAULT_SEC_API_KEY = "3161badc9a49d43da4c9db92d17e1213026a0f70df0fdabae4eaf7812f5188b3"
-DEFAULT_OPENAI_API_KEY = "sk-proj-V0Nx0PPFSpY0dBh2K-ilZWpEXz7VtkfsGCWOvv3vnNXdiENEi8o6qUkk0cVDzWUD2QcouKv--bT3aBlbkFJXNtz00JVeiF9oWgzBPEbkEhb8FKy6KaA2qXINvKNWNwGj7qq-ltmzv2NI79f6Fy2_5euht3yAA"
+# --- API Keys from Environment Variables ---
+SEC_API_KEY = os.getenv('SEC_API_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+if not SEC_API_KEY:
+    raise ValueError("SEC_API_KEY environment variable is required")
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY environment variable is required")
 
 # --- Initialize App ---
 app = Flask(__name__)
@@ -139,7 +145,7 @@ def analyze_with_chatgpt(content, company, ticker, form_type, user_config, sid):
     final_prompt = user_config['aiPrompt'].replace('{company}', company).replace('{ticker}', ticker).replace(
         '{formType}', form_type)
     request_content = final_prompt + f"\n\nFILING CONTENT TO ANALYZE:\n{content[:12000]}..."
-    api_key_to_use = user_config.get('openaiApiKey') or DEFAULT_OPENAI_API_KEY
+    api_key_to_use = user_config.get('openaiApiKey') or OPENAI_API_KEY
     try:
         if not api_key_to_use: raise ValueError("OpenAI API key is missing.")
         client = openai.OpenAI(api_key=api_key_to_use)
@@ -200,7 +206,7 @@ def process_filing(filing_data, user_config, sid):
 
             if ai_analysis.get('alertHighlight', False):
                 text_to_speak = ai_analysis.get('textToSpeak', 'Important alert detected, but no summary was provided.')
-                openai_api_key = user_config.get('openaiApiKey') or DEFAULT_OPENAI_API_KEY
+                openai_api_key = user_config.get('openaiApiKey') or OPENAI_API_KEY
                 socketio.start_background_task(generate_and_send_audio, text_to_speak, openai_api_key, sid)
 
         elif ai_analysis:
@@ -324,7 +330,7 @@ def handle_start_monitoring(data):
                   room=sid)
     ws_state['is_monitoring'] = True
     ws_state['user_config'] = data
-    sec_api_key_to_use = data.get('secApiKey') or DEFAULT_SEC_API_KEY
+    sec_api_key_to_use = data.get('secApiKey') or SEC_API_KEY
     start_websocket_connection(sec_api_key_to_use, data['formTypes'], sid)
     socketio.emit('monitoring_status', {'isMonitoring': True}, room=sid)
 
@@ -351,7 +357,7 @@ def handle_ticker_test(data):
     start_date, form_query = (datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d'), " OR ".join(
         f'"{f}"' for f in form_types)
     query = f'ticker:{ticker} AND formType:({form_query}) AND filedAt:[{start_date} TO *]'
-    sec_api_key_to_use = data.get('secApiKey') or DEFAULT_SEC_API_KEY
+    sec_api_key_to_use = data.get('secApiKey') or SEC_API_KEY
     local_query_api = QueryApi(api_key=sec_api_key_to_use)
     try:
         filings_response = local_query_api.get_filings(
