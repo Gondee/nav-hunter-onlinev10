@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Respond with a simple JSON object' },
-          { role: 'user', content: 'Return JSON: {"status": "working", "message": "OpenAI connected"}' }
+          { role: 'system' as const, content: 'Respond with a simple JSON object' },
+          { role: 'user' as const, content: 'Return JSON: {"status": "working", "message": "OpenAI connected"}' }
         ],
         temperature: 0,
         max_tokens: 50,

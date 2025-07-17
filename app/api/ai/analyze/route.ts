@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
     const aiRequest = {
       model: config?.aiModel || 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: 'You must respond with valid JSON only. No markdown formatting.' },
-        { role: 'user', content: userPrompt }
+        { role: 'system' as const, content: 'You must respond with valid JSON only. No markdown formatting.' },
+        { role: 'user' as const, content: userPrompt }
       ],
       temperature: config?.aiTemperature || 0.1,
       max_tokens: 500,

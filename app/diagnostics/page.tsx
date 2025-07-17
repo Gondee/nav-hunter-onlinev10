@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRealtimeContext, useRealtimeEventContext } from '@/contexts/RealtimeContext'
+import { RealtimeProvider, useRealtimeContext, useRealtimeEventContext } from '@/contexts/RealtimeContext'
 
-export default function DiagnosticsPage() {
-  const { connectionState, isConnected } = useRealtimeContext()
+function DiagnosticsContent() {
+  const { connectionState } = useRealtimeContext()
+  const isConnected = connectionState.status === 'connected'
   const [events, setEvents] = useState<any[]>([])
   const [debugResults, setDebugResults] = useState<any>(null)
   
@@ -36,7 +37,7 @@ export default function DiagnosticsPage() {
       setDebugResults(result)
     } catch (error) {
       console.error('Debug test failed:', error)
-      setDebugResults({ error: error.message })
+      setDebugResults({ error: error instanceof Error ? error.message : String(error) })
     }
   }
   
@@ -89,7 +90,7 @@ Example response for a Bitcoin purchase:
       setDebugResults(result)
     } catch (error) {
       console.error('Ticker test failed:', error)
-      setDebugResults({ error: error.message })
+      setDebugResults({ error: error instanceof Error ? error.message : String(error) })
     }
   }
   
@@ -144,5 +145,13 @@ Example response for a Bitcoin purchase:
         </div>
       </div>
     </div>
+  )
+}
+
+export default function DiagnosticsPage() {
+  return (
+    <RealtimeProvider>
+      <DiagnosticsContent />
+    </RealtimeProvider>
   )
 }
