@@ -42,6 +42,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.svg$).*)',
   ],
 };
-
-// Ensure middleware runs in Edge Runtime
-export const runtime = 'edge';
