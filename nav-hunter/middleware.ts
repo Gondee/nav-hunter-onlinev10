@@ -10,10 +10,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // For now, disable authentication to allow access to the site
-  // TODO: Re-enable authentication when ready
-  return NextResponse.next();
-  
   // Check for auth token
   const token = request.cookies.get('auth-token');
   
