@@ -42,7 +42,7 @@ export async function getSession(): Promise<JWTPayload | null> {
 }
 
 export function validatePassword(password: string): boolean {
-  const appPassword = process.env.APP_PASSWORD;
+  const appPassword = process.env.APP_PASSWORD || 'navhunter2024';
   
   if (!appPassword) {
     console.error('APP_PASSWORD environment variable is not set');
