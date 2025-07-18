@@ -1,5 +1,9 @@
-import { redirect } from 'next/navigation';
-
 export default function Dashboard() {
-  redirect('/dashboard/classic');
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>Dashboard is loading...</p>
+      <a href="/dashboard/classic">Go to Classic Dashboard</a>
+    </div>
+  );
 }
