@@ -1,44 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { RealtimeProvider } from '@/contexts/RealtimeContext';
-import { ClassicDashboard } from '@/components/dashboard/ClassicDashboard';
-
 export default function ClassicDashboardPage() {
-  const [audioEnabled, setAudioEnabled] = useState(false);
-  
-  const handleLogout = async () => {
-    // No auth - just redirect to home
-    window.location.href = '/';
-  };
-
-  useEffect(() => {
-    // Enable audio on any click
-    const enableAudio = () => {
-      setAudioEnabled(true);
-      document.getElementById('audio-prompt')?.style.setProperty('display', 'none');
-    };
-    
-    document.addEventListener('click', enableAudio, { once: true });
-    
-    return () => {
-      document.removeEventListener('click', enableAudio);
-    };
-  }, []);
-
   return (
-    <RealtimeProvider>
-      <div className="min-h-screen bg-gray-900">
-        {!audioEnabled && (
-          <div 
-            id="audio-prompt"
-            className="fixed top-0 left-0 right-0 bg-amber-600 text-white text-center py-2 z-50"
-          >
-            Click anywhere to enable audio alerts
-          </div>
-        )}
-        <ClassicDashboard onLogout={handleLogout} audioEnabled={audioEnabled} />
-      </div>
-    </RealtimeProvider>
+    <div className="min-h-screen bg-gray-900 text-white p-8">
+      <h1 className="text-3xl font-bold mb-4">NAV Hunter Dashboard</h1>
+      <p className="mb-4">Dashboard is loading...</p>
+      <p className="text-sm text-gray-400">If you see this, the dashboard page is working!</p>
+      <button 
+        onClick={() => window.location.href = '/'}
+        className="mt-4 bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
+      >
+        Back to Home
+      </button>
+    </div>
   );
 }
