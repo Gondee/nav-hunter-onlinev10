@@ -3,14 +3,12 @@
 import { useState, useEffect } from 'react';
 import { RealtimeProvider } from '@/contexts/RealtimeContext';
 import { ClassicDashboard } from '@/components/dashboard/ClassicDashboard';
-import { useAuth } from '@/hooks/useAuth';
 
 export default function ClassicDashboardPage() {
   const [audioEnabled, setAudioEnabled] = useState(false);
-  const { logout } = useAuth();
-  
   const handleLogout = async () => {
-    await logout();
+    // Auth removed - no logout needed
+    window.location.href = '/';
   };
 
   useEffect(() => {
