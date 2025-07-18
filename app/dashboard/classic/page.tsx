@@ -37,7 +37,7 @@ export default function ClassicDashboardPage() {
             Click anywhere to enable audio alerts
           </div>
         )}
-        <ClassicDashboard onLogout={handleLogout} />
+        <ClassicDashboard onLogout={handleLogout} audioEnabled={audioEnabled} />
       </div>
     </RealtimeProvider>
   );
