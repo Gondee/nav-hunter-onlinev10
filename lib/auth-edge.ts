@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose';
-import { JWTPayload } from '@/types/auth';
+import { JWTPayload } from '../types/auth';
 
 const secret = new TextEncoder().encode(
   process.env.JWT_SECRET || 'nav-hunter-secret-key-change-in-production'
