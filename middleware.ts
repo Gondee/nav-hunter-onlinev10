@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from './lib/auth-edge';
+import { jwtVerify } from 'jose';
+
+interface JWTPayload {
+  authenticated: boolean;
+  exp?: number;
+}
+
+const secret = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'nav-hunter-secret-key-change-in-production'
+);
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -18,16 +27,27 @@ export async function middleware(request: NextRequest) {
   }
   
   // Verify token
-  const payload = await verifyToken(token.value);
-  
-  if (!payload || !payload.authenticated) {
-    // Clear invalid token
+  try {
+    const { payload } = await jwtVerify(token.value, secret, {
+      algorithms: ['HS256'],
+    });
+    
+    const jwtPayload = payload as unknown as JWTPayload;
+    
+    if (!jwtPayload || !jwtPayload.authenticated) {
+      // Clear invalid token
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('auth-token');
+      return response;
+    }
+    
+    return NextResponse.next();
+  } catch (error) {
+    // Clear invalid token on verification error
     const response = NextResponse.redirect(new URL('/login', request.url));
     response.cookies.delete('auth-token');
     return response;
   }
-  
-  return NextResponse.next();
 }
 
 export const config = {
