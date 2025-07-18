@@ -1,19 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { RealtimeProvider } from '@/contexts/RealtimeContext';
 import { ClassicDashboard } from '@/components/dashboard/ClassicDashboard';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ClassicDashboardPage() {
-  const router = useRouter();
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const { logout } = useAuth();
   
   const handleLogout = async () => {
-    const response = await fetch('/api/auth/logout', { method: 'POST' });
-    if (response.ok) {
-      router.push('/login');
-    }
+    await logout();
   };
 
   useEffect(() => {
