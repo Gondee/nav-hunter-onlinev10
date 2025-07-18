@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 import { broadcastLog, broadcast, broadcastTestFinished } from '@/lib/realtime/server';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   let ticker: string | undefined;
   

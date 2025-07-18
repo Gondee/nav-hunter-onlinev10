@@ -3,6 +3,8 @@ import { broadcastLog, broadcastReplayFinished, broadcastStats } from '@/lib/rea
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const { config } = await request.json();
