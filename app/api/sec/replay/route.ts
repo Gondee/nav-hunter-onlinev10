@@ -12,10 +12,8 @@ export async function POST(request: NextRequest) {
     broadcastLog('⚠️ Replay functionality is currently disabled on Vercel deployment', 'warn');
     broadcastLog('File system operations are not supported in serverless environment', 'info');
     
-    // Send completion message
-    setTimeout(() => {
-      broadcastReplayFinished();
-    }, 1000);
+    // Send completion message immediately
+    broadcastReplayFinished(true, 0, ['Replay disabled on Vercel']);
     
     return Response.json({ 
       success: true,
