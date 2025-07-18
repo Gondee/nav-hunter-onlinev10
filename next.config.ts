@@ -1,12 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Ensure server components work properly
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
-  },
+  // Remove experimental features for now
 };
 
 export default nextConfig;
