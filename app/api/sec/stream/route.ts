@@ -2,8 +2,7 @@ import { NextRequest } from 'next/server';
 import WebSocket from 'ws';
 import { broadcastLog, broadcastWSStatus, broadcastMonitoringStatus, broadcastStats, broadcastWSFlash } from '@/lib/realtime/server';
 import { createSSEStream } from '@/lib/realtime/server';
-import { appendFile } from 'fs/promises';
-import { join } from 'path';
+// File system operations removed for Vercel compatibility
 
 export const runtime = 'nodejs';
 
@@ -58,8 +57,8 @@ function connectToSEC() {
         
         // Write to log file
         try {
-          const logPath = join(process.cwd(), 'websocket_stream.log');
-          await appendFile(logPath, message + '\n');
+          // Log to console instead of file system
+          console.log('[WebSocket Log]', message);
         } catch (logError) {
           console.error('Failed to write to websocket_stream.log:', logError);
         }

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+// Server component - no 'use client' directive
 export default function Home() {
   return (
     <main className="flex min-h-screen items-center justify-center">

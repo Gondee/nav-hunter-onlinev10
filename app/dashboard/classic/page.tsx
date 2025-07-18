@@ -1,3 +1,5 @@
+'use client';
+
 export default function ClassicDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
