@@ -188,6 +188,23 @@ export default function ClassicDashboardPage() {
               >
                 Test Logs
               </button>
+              <button
+                onClick={async () => {
+                  setIsLoading(true);
+                  try {
+                    const res = await fetch('/api/test-alerts', { method: 'POST' });
+                    const data = await res.json();
+                    console.log('Test alerts result:', data);
+                  } catch (error) {
+                    console.error('Test alerts failed:', error);
+                  }
+                  setIsLoading(false);
+                }}
+                disabled={isLoading}
+                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium transition-colors"
+              >
+                Test Alerts
+              </button>
               {!isMonitoring ? (
                 <button
                   onClick={startMonitoring}
