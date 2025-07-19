@@ -62,29 +62,23 @@ export async function POST(request: NextRequest) {
         const filing = filingsToProcess[i];
         const filingDate = filing.filedAt?.split('T')[0] || 'N/A';
         
-        // Log filing structure to debug
+        // Log filing structure to UI
+        broadcastLog(`📄 Filing #${i+1} for ${filing.ticker}:`, 'info');
+        broadcastLog(`  Form: ${filing.formType} | Date: ${filing.filedAt}`, 'info');
+        broadcastLog(`  Company: ${filing.companyName}`, 'info');
+        
+        // Also log to console for debugging
         console.log('\n[Ticker Test] Filing #' + (i+1) + ' structure:');
-        console.log('  ticker:', filing.ticker);
-        console.log('  formType:', filing.formType);
-        console.log('  filedAt:', filing.filedAt);
-        console.log('  companyName:', filing.companyName);
-        console.log('  linkToTxt:', filing.linkToTxt || 'NOT PRESENT');
-        console.log('  linkToText:', filing.linkToText || 'NOT PRESENT');
-        console.log('  linkToHtml:', filing.linkToHtml || 'NOT PRESENT');
-        console.log('  linkToFilingDetails:', filing.linkToFilingDetails || 'NOT PRESENT');
-        console.log('  documentFormatFiles:', filing.documentFormatFiles ? 'PRESENT' : 'NOT PRESENT');
         console.log('  All keys:', Object.keys(filing));
         
         broadcastLog(`--- Processing filing ${i + 1} of ${filingsToProcess.length} (${filing.formType} filed on ${filingDate}) ---`, 'info');
         
-        console.log(`\n[Ticker Test] === PROCESSING FILING ${i + 1} ===`);
-        console.log('[Ticker Test] Calling process-filing for:', filing.ticker);
-        console.log('[Ticker Test] Config being sent:', {
-          formTypes: config?.formTypes,
-          hasPrompt: !!config?.aiPrompt,
-          promptLength: config?.aiPrompt?.length,
-          model: config?.aiModel
-        });
+        broadcastLog(`🔄 Processing filing ${i + 1}/${filingsToProcess.length} for ${filing.ticker}`, 'info');
+        
+        // Log config details
+        if (config) {
+          broadcastLog(`⚙️ Config: Forms [${config.formTypes?.join(', ')}] | Threshold: ${config.confidenceThreshold}%`, 'info');
+        }
         
         // Process the filing using direct module import
         const processFilingModule = await import('../process-filing/route');
@@ -100,29 +94,35 @@ export async function POST(request: NextRequest) {
         });
         
         const response = await processFilingModule.POST(mockRequest as any);
-        console.log('[Ticker Test] Process filing response:', response.status);
+        broadcastLog(`📡 Response status: ${response.status}`, 'info');
         
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('[Ticker Test] Failed to process filing:', errorText);
+          broadcastLog(`❌ Failed to process filing: ${errorText}`, 'error');
         } else {
           // Read the response body once
           const responseText = await response.text();
           try {
             const result = JSON.parse(responseText);
-            console.log('[Ticker Test] Process filing result:', result);
+            if (result.alert) {
+              broadcastLog(`🎯 Alert generated! Confidence: ${result.confidence || 'N/A'}%`, 'success');
+              if (result.analysis?.summary) {
+                broadcastLog(`💡 ${result.analysis.summary}`, 'info');
+              }
+            } else {
+              broadcastLog(`⏭️ No alert for filing ${i + 1} - did not meet criteria`, 'info');
+            }
           } catch (parseError) {
-            console.log('[Ticker Test] Failed to parse process response as JSON');
-            console.log('[Ticker Test] Response text:', responseText.substring(0, 200));
+            broadcastLog(`⚠️ Could not parse response for filing ${i + 1}`, 'warning');
           }
         }
-        console.log(`[Ticker Test] === END FILING ${i + 1} ===\n`);
+        broadcastLog(`✅ Completed filing ${i + 1}/${filingsToProcess.length}`, 'info');
         
         // Small delay between filings
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
-      broadcastLog(`--- Test for [${ticker}] Complete ---`, 'warn');
+      broadcastLog(`🏁 Test complete for ${ticker} - Processed ${filingsToProcess.length} filings`, 'success');
       broadcastTestFinished(ticker, true);
       
       return Response.json({ 
@@ -131,9 +131,9 @@ export async function POST(request: NextRequest) {
         filings: filingsToProcess.length 
       });
     } else {
-      broadcastLog(`No relevant filings found for ${ticker} in the last 6 months.`, 'info');
+      broadcastLog(`❌ No relevant filings found for ${ticker} in the last 6 months.`, 'warning');
       
-      broadcastLog(`--- Test for [${ticker}] Complete ---`, 'warn');
+      broadcastLog(`🏁 Test complete for ${ticker} - No filings to process`, 'info');
       broadcastTestFinished(ticker, false);
       
       return Response.json({ 
