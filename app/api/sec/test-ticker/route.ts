@@ -86,17 +86,20 @@ export async function POST(request: NextRequest) {
           model: config?.aiModel
         });
         
-        // Process the filing - IMPORTANT: Include auth headers from the original request
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/sec/process-filing`, {
+        // Process the filing using direct module import
+        const processFilingModule = await import('../process-filing/route');
+        
+        // Create a mock request for the process-filing handler
+        const mockRequest = new Request('http://localhost/api/sec/process-filing', {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
-            // Forward the auth cookie from the incoming request
             'Cookie': request.headers.get('cookie') || ''
           },
           body: JSON.stringify({ filing, config })
         });
         
+        const response = await processFilingModule.POST(mockRequest as any);
         console.log('[Ticker Test] Process filing response:', response.status);
         
         if (!response.ok) {
