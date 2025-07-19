@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { StatusPanel } from '@/components/status/StatusPanel';
 import { SimpleAlertCard } from '@/components/alerts/SimpleAlertCard';
+import { SimpleConfigPanel } from '@/components/config/SimpleConfigPanel';
 
 interface Alert {
   id: string;
@@ -246,13 +247,19 @@ export default function ClassicDashboardPage() {
             )}
           </div>
           
-          <div>
+          <div className="space-y-6">
             <StatusPanel
               isConnected={isConnected}
               connectionStatus={connectionStatus}
               processedCount={processedCount}
               alertCount={alertCount}
               isMonitoring={isMonitoring}
+            />
+            <SimpleConfigPanel
+              onConfigChange={(config) => {
+                console.log('Config updated:', config);
+                // In a real app, this would update the monitoring filters
+              }}
             />
           </div>
         </div>
