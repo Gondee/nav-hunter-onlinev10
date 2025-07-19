@@ -166,6 +166,16 @@ export default function ClassicDashboardPage() {
               </span>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={async () => {
+                  const res = await fetch('/api/sec/test-connection');
+                  const data = await res.json();
+                  console.log('SEC Test:', data);
+                }}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Test SEC
+              </button>
               {!isMonitoring ? (
                 <button
                   onClick={startMonitoring}

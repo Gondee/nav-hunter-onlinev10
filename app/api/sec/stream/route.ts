@@ -36,11 +36,15 @@ let isMonitoring = false;
 function connectToSEC() {
   if (!process.env.SEC_API_KEY) {
     console.error('SEC_API_KEY not configured');
-    broadcastLog('SEC API key not configured', 'error');
+    broadcastLog('❌ SEC API key not configured in environment variables', 'error');
     return;
   }
 
-  const wsUrl = `${process.env.SEC_WEBSOCKET_URL}${process.env.SEC_API_KEY}`;
+  const wsUrl = `${process.env.SEC_WEBSOCKET_URL || 'wss://api.sec-api.io/live?apiKey='}${process.env.SEC_API_KEY}`;
+  
+  broadcastLog(`🔌 Connecting to SEC WebSocket...`, 'info');
+  broadcastLog(`📡 WebSocket URL: ${wsUrl.substring(0, 50)}...`, 'info');
+  console.log('[SEC Connect] Attempting connection to:', wsUrl.substring(0, 50) + '...');
   
   try {
     ws = new WebSocket(wsUrl);
@@ -48,31 +52,42 @@ function connectToSEC() {
     ws.onopen = () => {
       console.log('### SEC Stream Opened ###');
       broadcastWSStatus({ status: 'Live', color: 'var(--accent-green)' });
-      broadcastLog('✅ WebSocket connection opened successfully.', 'info');
+      broadcastLog('✅ WebSocket connection opened successfully!', 'success');
+      broadcastLog('👂 Listening for SEC filings...', 'info');
     };
     
     ws.onmessage = async (event) => {
       try {
         const message = event.data.toString();
         
-        // Write to log file
-        try {
-          // Log to console instead of file system
-          console.log('[WebSocket Log]', message);
-        } catch (logError) {
-          console.error('Failed to write to websocket_stream.log:', logError);
-        }
+        // Log raw message for debugging
+        console.log('[SEC WebSocket Raw Message]:', message);
+        broadcastLog(`📥 Raw SEC data received: ${message.substring(0, 200)}${message.length > 200 ? '...' : ''}`, 'info');
         
         // Parse the message - it could be an array of filings
         const filings = JSON.parse(message);
         const filingsArray = Array.isArray(filings) ? filings : [filings];
         
+        broadcastLog(`📊 Parsed ${filingsArray.length} filing(s) from SEC`, 'info');
+        
         // Process each filing
         for (const filing of filingsArray) {
           const formType = filing.formType || 'N/A';
           const ticker = filing.ticker || 'N/A';
+          const company = filing.companyName || filing.company || 'Unknown';
           const userConfig = (global as any).userConfig || {};
           const formTypes = userConfig.formTypes || ['8-K', '10-Q', '10-K'];
+          
+          // Log each filing received
+          broadcastLog(`📄 Filing: ${company} (${ticker}) - ${formType}`, 'info');
+          console.log('[SEC Filing Details]:', {
+            ticker,
+            company,
+            formType,
+            filedAt: filing.filedAt,
+            acceptedDate: filing.acceptedDate,
+            cik: filing.cik
+          });
           
           // Flash WebSocket status
           broadcastWSFlash('', 'success');
@@ -81,14 +96,15 @@ function connectToSEC() {
           const matchesFilter = formTypes.some((baseForm: string) => formType.startsWith(baseForm));
           
           if (matchesFilter) {
-            broadcastLog(`📬 Received [${ticker} - ${formType}]. Matches filter, processing...`, 'info');
+            broadcastLog(`✅ [${ticker} - ${formType}] matches filter, processing...`, 'success');
             await processSecFiling(filing);
           } else {
-            broadcastLog(`📬 Received [${ticker} - ${formType}]. Does not match filter, skipping.`, 'skipped');
+            broadcastLog(`⏭️ [${ticker} - ${formType}] doesn't match filter (looking for: ${formTypes.join(', ')})`, 'warning');
           }
         }
       } catch (error) {
         console.error('Error processing message:', error);
+        broadcastLog(`❌ Error processing SEC message: ${error}`, 'error');
       }
     };
     
