@@ -62,6 +62,9 @@ export default function ClassicDashboardPage() {
       try {
         const data = JSON.parse(event.data);
         
+        // Log all events for debugging
+        console.log('[SSE Event]:', data.type, data);
+        
         if (data.type === 'new_alert') {
           const newAlert: Alert = {
             id: data.id || Date.now().toString(),
@@ -93,8 +96,8 @@ export default function ClassicDashboardPage() {
           const logEntry: LogEntry = {
             id: Date.now().toString() + Math.random(),
             timestamp: data.timestamp || new Date().toISOString(),
-            message: data.message,
-            type: data.level === 'error' ? 'error' : data.level === 'warning' ? 'warning' : 'info'
+            message: data.data?.message || data.message || 'Unknown message',
+            type: data.data?.level === 'error' ? 'error' : data.data?.level === 'warning' ? 'warning' : data.data?.level === 'success' ? 'success' : 'info'
           };
           setLogs(prev => [logEntry, ...prev].slice(0, 100));
         }
@@ -175,6 +178,15 @@ export default function ClassicDashboardPage() {
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium transition-colors"
               >
                 Test SEC
+              </button>
+              <button
+                onClick={async () => {
+                  const res = await fetch('/api/test-logs');
+                  console.log('Test logs triggered');
+                }}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors"
+              >
+                Test Logs
               </button>
               {!isMonitoring ? (
                 <button

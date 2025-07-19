@@ -1,16 +1,18 @@
 import { NextRequest } from 'next/server';
+import { broadcastLog } from '@/lib/realtime/server';
 
 export async function GET(request: NextRequest) {
-  console.log('=== TEST LOG 1: console.log ===');
-  console.error('=== TEST LOG 2: console.error ===');
-  console.warn('=== TEST LOG 3: console.warn ===');
+  console.log('=== TEST LOG: Broadcasting test messages ===');
   
-  // Also try process.stdout.write
-  process.stdout.write('=== TEST LOG 4: process.stdout ===\n');
-  process.stderr.write('=== TEST LOG 5: process.stderr ===\n');
+  // Broadcast different types of logs
+  broadcastLog('📝 Test log message - INFO level', 'info');
+  broadcastLog('⚠️ Test log message - WARNING level', 'warning');
+  broadcastLog('❌ Test log message - ERROR level', 'error');
+  broadcastLog('✅ Test log message - SUCCESS level', 'success');
+  broadcastLog('🔍 Test log message - No level specified');
   
   return Response.json({ 
-    message: 'Check server console for 5 different log types',
+    message: 'Test logs broadcasted - check System Logs panel',
     timestamp: new Date().toISOString()
   });
 }

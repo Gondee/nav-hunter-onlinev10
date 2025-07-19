@@ -7,8 +7,11 @@ export async function POST() {
   try {
     broadcastLog('🛑 Stopping SEC monitoring...', 'info');
     
-    // Stop the WebSocket connection
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/sec/stream`, {
+    // Import the stream module directly
+    const streamModule = await import('../stream/route');
+    
+    // Call the POST handler directly
+    const mockRequest = new Request('http://localhost/api/sec/stream', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -17,16 +20,13 @@ export async function POST() {
         action: 'stop'
       })
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to stop WebSocket connection');
+    
+    const result = await streamModule.POST(mockRequest as any);
+    const data = await result.json();
+    
+    if (data.status !== 'stopped') {
+      throw new Error('Failed to stop monitoring');
     }
-
-    // Broadcast monitoring status
-    broadcastMonitoringStatus({
-      isMonitoring: false,
-      timestamp: new Date().toISOString()
-    });
 
     broadcastLog('✅ SEC monitoring stopped', 'success');
 
@@ -39,7 +39,7 @@ export async function POST() {
     console.error('Error stopping monitoring:', error);
     broadcastLog(`❌ Failed to stop monitoring: ${error}`, 'error');
     return NextResponse.json(
-      { success: false, error: 'Failed to stop monitoring' },
+      { success: false, error: `Failed to stop monitoring: ${error}` },
       { status: 500 }
     );
   }
